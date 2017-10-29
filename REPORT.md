@@ -5,7 +5,7 @@
 ### Name of custom command for import
 
 Name of custom command for import is changed to "import\_data".
-This is because "import" is reserved word, and cause an following error
+This is because "import" is reserved word, and it causes an following error for my test implementation.
 
 ```
 Traceback (most recent call last):
@@ -28,16 +28,13 @@ PostgreSQL will be better:)
 
 ### Docker
 
-Because I changed DB, you need to set up environment.
-This will take your time and will be boring work.
-Docker will help you preparing environment.
+Docker will help you preparing environments.
 If docker is already installed, you are ready for build & deploy!
 
 
 ### Summary visualization
 
 Summary is visualized by daily summarized data.
-This is for perfomance.
 If api returns all timestamp data, it will takes many time to process.
 For all period visualization, this will be sufficient for granularity.
 
@@ -119,5 +116,4 @@ What is the desirable handling?
 ### Fail to connect to DB
 
 Immediately after DB docker image start up, connection to DB could be failed.
-
 
