@@ -7,13 +7,12 @@ from django.shortcuts import render
 
 
 def summary(request):
-    context = {
-        'message': 'Hello!',
-    }
+    context = {}
     return render(request, 'consumption/summary.html', context)
 
 
-def detail(request):
+def detail(request, user_id):
     context = {
+        "user_id": int(user_id)
     }
-    return render(request, 'consumption/detail.html', context)
+    return render(request, 'consumption/summary.html', context)

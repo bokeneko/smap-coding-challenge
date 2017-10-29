@@ -1,7 +1,174 @@
 {% extends 'consumption/layout.html' %}
 
+{% block title %}SMAP Python Developer Challenge{% endblock %}
+
+{% block nav %}
+<div class="container">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">SMAP Python Developer Challenge</a>
+  </div>
+  <div id="navbar" class="collapse navbar-collapse">
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="/summary/">Summary</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
 {% block content %}
+<!-- line chart -->
+<div class="container">
+  <svg id="summary-line-chart" width="960" height="500"></svg>
+</div>
 
-<h1>{{message}}</h1>
+<!-- data table -->
+<div class="container">
+  <table id="summary-table" class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <td>User ID</td>
+        <td>Area</td>
+        <td>Tariff</td>
+        <td>Consumption</td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody> 
+  </table>
+</div>
 
+<script>
+function summarize_data_linechart(data) {
+  var parseTime = d3.timeParse("%Y-%m-%d");
+  var summarized = {};
+  data.forEach(function(d) {
+    if (d.date in summarized) {
+      summarized[d.date] += d.summary;
+    } else {
+      summarized[d.date] = d.summary;
+    }
+  });
+  return Object.keys(summarized).map(function(key){
+          return {
+                  "date": parseTime(key),
+                  "summary": summarized[key]
+                };
+        });
+}
+
+function summarize_data_table(data) {
+  var summarized = {};
+  data.forEach(function(d) {
+    if (d.user.id in summarized) {
+      summarized[d.user.id].summary += d.summary
+    } else {
+      summarized[d.user.id] = {
+              "summary": d.summary,
+              "area": d.user.area,
+              "tariff": d.user.tariff
+        };
+    }
+  });
+  return Object.keys(summarized).map(function(key){
+          return {
+                  "user": key,
+                  "summary": summarized[key].summary,
+                  "area": summarized[key].area,
+                  "tariff": summarized[key].tariff
+                };
+        });
+}
+
+function draw_chart(data) {
+  var summarized = summarize_data_linechart(data)  
+  summarized.sort(function(a, b) { return a.date - b.date; })
+
+  var svg = d3.select("#summary-line-chart"),
+      margin = {top: 20, right: 20, bottom: 30, left: 80},
+      width = +svg.attr("width") - margin.left - margin.right,
+      height = +svg.attr("height") - margin.top - margin.bottom,
+      g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var x = d3.scaleTime().rangeRound([0, width]);
+  var y = d3.scaleLinear().rangeRound([height, 0]);
+  var line = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.summary); });
+  x.domain(d3.extent(summarized, function(d) { return d.date; }));
+  y.domain([0, d3.max(summarized, function(d) { return d.summary; })]);
+
+  g.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  g.append("g")
+      .call(d3.axisLeft(y))
+      .append("text")
+      .attr("fill", "#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Consumption");
+
+  g.append("path")
+      .datum(summarized)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("stroke-width", 1.5)
+      .attr("d", line);
+}
+
+function show_table(data) {
+  var summarized = summarize_data_table(data)  
+  summarized.sort(function(a, b) { return a.user - b.user; })
+
+  var tbody = $("#summary-table > tbody"); 
+  summarized.forEach(function(d) {
+    tbody.append(`<tr>
+  {% if user_id %}
+  <td>${d.user}</td>
+  {% else %}
+  <td><a href="/detail/${d.user}/">${d.user}</a></td>
+  {% endif %}
+  <td>${d.area}</td>
+  <td>${d.tariff}</td>
+  <td>${d.summary}</td>
+</tr>`);
+  }); 
+}
+
+function load_summary() {
+  $.ajax({
+    type: "GET",
+    url: "/api/v1/summary/",
+    {% if user_id %}
+    data: {
+        q: JSON.stringify({user_ids: [{{ user_id }}]})
+    },
+    {% endif %}
+    dataType: 'json',
+    success: function(json) {
+      show_table(json);
+      draw_chart(json);
+    },
+    error: function() {
+      console.log('data load failed...');
+      alert("Loading data failed. Contact to Administrator.");
+    }
+  });
+}
+
+$(window).on('load',function(){
+  load_summary();
+});
+</script>
 {% endblock %}
