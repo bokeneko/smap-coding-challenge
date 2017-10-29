@@ -1,6 +1,6 @@
 # SMAP Python Developer Challenge
 
-This is bokeneko"s inplementation for [SMAP Python Developer Challenge](https://github.com/camenergydatalab/smap-coding-challenge)
+This is bokeneko's inplementation for [SMAP Python Developer Challenge](https://github.com/camenergydatalab/smap-coding-challenge)
 
 ## Requirements
 
