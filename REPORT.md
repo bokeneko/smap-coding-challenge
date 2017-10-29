@@ -35,8 +35,8 @@ If docker is already installed, you are ready for build & deploy!
 ### Summary visualization
 
 Summary is visualized by daily summarized data.
-If api returns all timestamp data, it will takes many time to process.
-For all period visualization, this will be sufficient for granularity.
+If api returns all timestamp data, it will take many time to process.
+For all period visualization, daily data will be sufficient for granularity.
 
 
 ### Authentication
@@ -95,7 +95,7 @@ print "decimal: {}".format(time.time() - t1)
 # decimal: 1.02504205704
 ```
 
-If we know that consumption data is up to a first decimal place, we can make the data 10 times and save it as an integer.
+If we know that consumption data has only first decimal place, we can make the data 10 times and save it as an integer.
 ```
 >>> int(0.1 * 10) + int(0.1 * 10) + int(0.1 * 10) == int(0.3 * 10)
 True
